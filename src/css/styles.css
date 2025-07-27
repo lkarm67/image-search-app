@@ -166,3 +166,34 @@ body {
     color: #2e2f42;
 }
 
+.load-more-btn{
+  position: fixed;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    cursor: pointer;
+    border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      width: 125px;
+      height: 40px;
+      background: #4e75ff;
+      font-weight: 500;
+      color: #fff;
+      visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+}
+
+.load-more-btn:not(.hidden) {
+  visibility: visible;
+  opacity: 1;
+}
+
+.load-more-btn:hover,
+.load-more-btn:focus {
+  background: #6c8cff;
+}
+
+
