@@ -18,6 +18,7 @@ const loadMoreBtn = document.querySelector('.load-more-btn');
 let currentQuery = '';
 let currentPage = 1;
 let totalHits = 0;
+let alreadyLoaded = 0; 
 
 form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -28,6 +29,7 @@ form.addEventListener('submit', async (event) => {
         message: 'Please enter a search query!',
         position: 'topRight',
       });
+      hideLoader();
       return;
     }
   
@@ -40,26 +42,36 @@ form.addEventListener('submit', async (event) => {
     try {
       const data = await getImagesByQuery(currentQuery, currentPage);
       totalHits = data.totalHits;
+      alreadyLoaded = data.hits.length; 
         
       if (data.hits.length === 0) {
+          
           iziToast.info({
             message: 'Sorry, there are no images matching your search query. Please try again!',
             position: 'topRight',
           });
-        } else {
+      } else {
           createGallery(data.hits);
-          if (data.totalHits > 15) showLoadMoreButton();
-        }
-      } catch(error) {
+            
+          if (alreadyLoaded >= totalHits) {
+            iziToast.info({
+              message: "We're sorry, but you've reached the end of search results.",
+              position: 'topRight',
+          });
+          hideLoadMoreButton();
+          } else {
+          showLoadMoreButton();
+          }
+      }
+    } catch(error) {
         iziToast.error({
           message: 'Oops! Something went wrong. Please try again later.',
           position: 'topRight',
         });
-      } finally {
+    } finally {
       hideLoader();
-      input.value = '';
-      } 
-    });
+    } 
+});
 
 loadMoreBtn.addEventListener('click', async () => {
   currentPage += 1;
@@ -69,6 +81,8 @@ loadMoreBtn.addEventListener('click', async () => {
   try {
     const data = await getImagesByQuery(currentQuery, currentPage);
     createGallery(data.hits);
+    alreadyLoaded += data.hits.length; 
+
     
     const cardHeight = document.querySelector('.gallery-item').getBoundingClientRect().height;
     window.scrollBy({
@@ -76,9 +90,6 @@ loadMoreBtn.addEventListener('click', async () => {
       behavior: 'smooth'
     });
     
-    loadMoreBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });  
-
-    const alreadyLoaded = currentPage * 15;
     if (alreadyLoaded >= totalHits) {
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
